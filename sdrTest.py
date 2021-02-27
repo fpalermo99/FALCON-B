@@ -3,7 +3,7 @@ from rtlsdr  import RtlSdr
 import os, sys
 #import matplotlib
 #import matplotlib.pyplot as plt
-np.set_printoptions(threshold=sys.maxsize)
+#np.set_printoptions(threshold=sys.maxsize)
 
 print("\nFALCON-B Tracking and Monitoring Software v0.0.1.")
 print("Created by Ian Carney, Michael Krzystowczyk, William Lee, and Frank Palermo.")
