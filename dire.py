@@ -5,10 +5,12 @@ import os, sys
 #import matplotlib.pyplot as plt
 #np.set_printoptions(threshold=sys.maxsize)
 
-print("\nFALCON-B Tracking and Monitoring Software v0.0.1.")
+print("\nFALCON-B Tracking and Monitoring Software v0.0.2.")
 print("Created by Ian Carney, Michael Krzystowczyk, William Lee, and Frank Palermo.")
 print("Louisiana Tech University")
 print("This program is for technical demonstration only and is not for use\nin any commercial, industrial, or operational environments.\n")
+
+print("Version Notes: Adds ability to coordinate direction with multiple antennas.\n")
 
 
 
@@ -82,4 +84,5 @@ while(1):
 
 #avgSNR = np.mean(snr_vals)
 #print("The SNR is ", SNR)
+
 
