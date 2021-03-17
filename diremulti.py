@@ -1,6 +1,7 @@
 import numpy as np
 from rtlsdr  import RtlSdr
 import os, sys
+import threading
 #import matplotlib
 #import matplotlib.pyplot as plt
 #np.set_printoptions(threshold=sys.maxsize)
@@ -10,7 +11,7 @@ print("Created by Ian Carney, Michael Krzystowczyk, William Lee, and Frank Paler
 print("Louisiana Tech University")
 print("This program is for technical demonstration only and is not for use\nin any commercial, industrial, or operational environments.\n")
 
-print("Version Notes: Adds ability to coordinate direction with multiple antennas.\n")
+print("Version Notes: Adds ability to coordinate direction with multiple antennas.\n Multithreading has also been enabled for faster data collection\n")
 
 sdrgain = 27
 global snr1, snr2, snr3, snr4
@@ -72,10 +73,20 @@ sdr4.gain=sdrgain
     
     
 while(1):
-    sdr1data = readValues(sdr1) #Returns Power of SDR1
-    sdr2data = readValues(sdr2) #Returns Power of SDR2
-    sdr3data = readValues(sdr3) #Returns Power of SDR3
-    sdr4data = readValues(sdr4) #Returns Power of SDR4
+    sdr1data = threading.Thread(target=readValues, args=(sdr1)) #Returns Power of SDR1
+    sdr2data = threading.Thread(target=readValues, args=(sdr2)) #Returns Power of SDR2
+    sdr3data = threading.Thread(target=readValues, args=(sdr3)) #Returns Power of SDR3
+    sdr4data = threading.Thread(target=readValues, args=(sdr4)) #Returns Power of SDR4
+
+    sdr1data.start() #Starts collecting data from all 4 SDRs simultaneously
+    sdr2data.start()
+    sdr3data.start()
+    sdr4data.start()
+
+    sdr1data.join() #Waits for all collections to finish before proceeding
+    sdr2data.join()
+    sdr3data.join()
+    sdr4data.join()
 
     snr1 = getSNR(sdr1data) #Returns SNR of SDR1
     snr2 = getSNR(sdr2data) #Returns SNR of SDR2
