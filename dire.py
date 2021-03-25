@@ -6,7 +6,8 @@ import os, sys
 #np.set_printoptions(threshold=sys.maxsize)
 
 
-def readValues(receiver):
+def readValues(receiver,samp_rate):
+    print(samp_rate)
     data = receiver.read_samples(1024000)
     SigPower = 10*np.log10(10*((data.real**2)+(data.imag**2)))
     return SigPower
@@ -45,7 +46,7 @@ def getDist(SNR):
     #print("eq2", ian)
     #print("eq3 ", will)
     #print('mike', mike)
-    #print("The distance is between", mike-2, "and", mike+2,"ft. away")
+    print("The distance is between", mike-2, "and", mike+2,"ft. away")
     #print("Cold Distance: ", ColdDist)
     #print("Warm Distance: ", WarmDist)
     #print('\n')
@@ -126,46 +127,51 @@ def main():
     print("Version Notes: Adds ability to coordinate direction with multiple antennas.\n")
 
     sdrgain = 27
+    bw = 2e3
+    sampRate = 1.024e6
+
     #global snr1, snr2, snr3, snr4
     if len(sys.argv)==2:
         centerfreq = sys.argv[1]
     else:
-        centerfreq = 150e6
+        centerfreq = 434e6
 
     #print(len(sys.argv))
     #print(sys.argv[0])
 
     #Configures SDR1
     sdr1 = RtlSdr(serial_number='0000101')
-    sdr1.sample_rate = 1.024e6
-    sdr1.bandwidth = 512e3
+    sdr1.sample_rate = sampRate
+    sdr1.bandwidth = bw
     sdr1.center_freq = centerfreq
 
     #Configures SDR2
     sdr2 = RtlSdr(serial_number='0000102')
-    sdr2.sample_rate =1.024e6
-    sdr2.bandwidth = 512e3
+    sdr2.sample_rate = sampRate
+    sdr2.bandwidth = bw
     sdr2.center_freq = centerfreq
     sdr2.gain=sdrgain
 
     #Configures SDR3
     sdr3 = RtlSdr(serial_number='0000103')
-    sdr3.sample_rate =1.024e6
-    sdr3.bandwidth = 512e3
+    sdr3.sample_rate = sampRate
+    sdr3.bandwidth = bw
     sdr3.center_freq = centerfreq
     sdr3.gain=sdrgain
 
     #Configures SDR4
     sdr4 = RtlSdr(serial_number='0000104')
-    sdr4.sample_rate =1.024e6
-    sdr4.bandwidth = 512e3
+    sdr4.sample_rate = sampRate
+    sdr4.bandwidth = bw
     sdr4.center_freq = centerfreq
     sdr4.gain=sdrgain
+
+    print("Center Frequency: ", centerfreq)
     while(1):
-        sdr1data = readValues(sdr1) #Returns Power of SDR1
-        sdr2data = readValues(sdr2) #Returns Power of SDR2
-        sdr3data = readValues(sdr3) #Returns Power of SDR3
-        sdr4data = readValues(sdr4) #Returns Power of SDR4
+        sdr1data = readValues(sdr1, sampRate) #Returns Power of SDR1
+        sdr2data = readValues(sdr2, sampRate) #Returns Power of SDR2
+        sdr3data = readValues(sdr3, sampRate) #Returns Power of SDR3
+        sdr4data = readValues(sdr4, sampRate) #Returns Power of SDR4
 
         snr1 = np.float32(getSNR(sdr1data)) #Returns SNR of SDR1
         snr2 = np.float32(getSNR(sdr2data)) #Returns SNR of SDR2
@@ -189,14 +195,18 @@ def main():
             print("Printing vals that go into findcase\n")
             print(highSNR, secondSNR)
             print(snr1, snr2, snr3, snr4)
-            case, ceiling = findCase(highSNR, secondSNR, snr1, snr2, snr3, snr4)
-            print("\n")
-            print("Case Number: ", case)
-            print("Ceiling: ", ceiling, " degrees")
+            try:
+                case, ceiling = findCase(highSNR, secondSNR, snr1, snr2, snr3, snr4)
+                print("\n")
+                print("Case Number: ", case)
+                print("Ceiling: ", ceiling, " degrees")
 
-            angle = dirFind(shortDist, longDist, ceiling)
+                angle = dirFind(shortDist, longDist, ceiling)
 
-            print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
+                print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
+            except:
+                print("Casenum Error")
+                pass
 
 if(__name__ == "__main__"):
     main()
