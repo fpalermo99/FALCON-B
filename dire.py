@@ -1,6 +1,7 @@
 import numpy as np
 from rtlsdr  import RtlSdr
 import os, sys
+from time import sleep
 #import matplotlib
 #import matplotlib.pyplot as plt
 #np.set_printoptions(threshold=sys.maxsize)
@@ -9,6 +10,7 @@ import os, sys
 def readValues(receiver,samp_rate):
     print(samp_rate)
     data = receiver.read_samples(1024000)
+    valueDBFS = 20*np.log10(abs(data)/32768)
     SigPower = 10*np.log10(10*((data.real**2)+(data.imag**2)))
     return SigPower
     
@@ -23,7 +25,10 @@ def getSNR(power):
     no_outliers = power[not_outlier]
     Pmax = max(no_outliers)
     Pmin = min(no_outliers)
-    SNR = Pmax-Pmin
+    floor = -35.1205
+    print("Maximum SNR: ", Pmax)
+    print("Minimum SNR: ", Pmin)
+    SNR = Pmax-floor
     #snr_vals[i] = SNR
     #print("The SNR is ", SNR)
 
@@ -69,8 +74,15 @@ def dirFind(shortDist, longDist, ceiling):
     gammaDeg = np.rad2deg(gamma)
 
     angle1 = alphaDeg + 45
-    primeAngle = np.rad2deg(np.arctan(shortDist/boxLeg))
-    direction = ceiling - primeAngle
+    
+    z=np.sqrt((boxLeg**2)+(b**2)-(2*boxLeg*b*np.cos(angle1)))
+    mu = np.arcsin((np.sin(angle1)*b)/z)
+
+
+
+    direction =ceiling-mu
+
+
     
 
     return direction
@@ -109,6 +121,9 @@ def findCase(SNRmax, SNRsecond, snr1, snr2, snr3, snr4):
     elif(SNRmax == snr4 and SNRsecond == snr1):
         casenum = 8
         ceiling = 360
+    else:
+        casenum = 0
+        ceiling = 0
   
 
     return casenum, ceiling
@@ -126,24 +141,32 @@ def main():
 
     print("Version Notes: Adds ability to coordinate direction with multiple antennas.\n")
 
-    sdrgain = 27
-    bw = 2e3
+    sdrgain = 0
+    bw = 32e3
     sampRate = 1.024e6
+    correction = 50
 
     #global snr1, snr2, snr3, snr4
     if len(sys.argv)==2:
         centerfreq = sys.argv[1]
     else:
-        centerfreq = 434e6
+        centerfreq = 462662500 - (correction/2)
 
     #print(len(sys.argv))
     #print(sys.argv[0])
+
+    sdr1gain = 25
+    sdr2gain = 25
+    sdr3gain = 25
+    sdr4gain = 25
 
     #Configures SDR1
     sdr1 = RtlSdr(serial_number='0000101')
     sdr1.sample_rate = sampRate
     sdr1.bandwidth = bw
     sdr1.center_freq = centerfreq
+    sdr1.gain=sdrgain
+    sdr1.freq_correction = correction
 
     #Configures SDR2
     sdr2 = RtlSdr(serial_number='0000102')
@@ -151,6 +174,7 @@ def main():
     sdr2.bandwidth = bw
     sdr2.center_freq = centerfreq
     sdr2.gain=sdrgain
+    sdr2.freq_correction = correction
 
     #Configures SDR3
     sdr3 = RtlSdr(serial_number='0000103')
@@ -158,6 +182,7 @@ def main():
     sdr3.bandwidth = bw
     sdr3.center_freq = centerfreq
     sdr3.gain=sdrgain
+    sdr3.freq_correction = correction
 
     #Configures SDR4
     sdr4 = RtlSdr(serial_number='0000104')
@@ -165,12 +190,16 @@ def main():
     sdr4.bandwidth = bw
     sdr4.center_freq = centerfreq
     sdr4.gain=sdrgain
+    sdr4.freq_correction = correction
 
     print("Center Frequency: ", centerfreq)
     while(1):
         sdr1data = readValues(sdr1, sampRate) #Returns Power of SDR1
+        sleep(0.1)
         sdr2data = readValues(sdr2, sampRate) #Returns Power of SDR2
+        sleep(0.1)
         sdr3data = readValues(sdr3, sampRate) #Returns Power of SDR3
+        sleep(0.1)
         sdr4data = readValues(sdr4, sampRate) #Returns Power of SDR4
 
         snr1 = np.float32(getSNR(sdr1data)) #Returns SNR of SDR1
@@ -197,6 +226,8 @@ def main():
             print(snr1, snr2, snr3, snr4)
             try:
                 case, ceiling = findCase(highSNR, secondSNR, snr1, snr2, snr3, snr4)
+                if(case==0):
+                    raise TypeError
                 print("\n")
                 print("Case Number: ", case)
                 print("Ceiling: ", ceiling, " degrees")
@@ -204,7 +235,7 @@ def main():
                 angle = dirFind(shortDist, longDist, ceiling)
 
                 print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
-            except:
+            except TypeError:
                 print("Casenum Error")
                 pass
 
