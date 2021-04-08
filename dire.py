@@ -8,7 +8,7 @@ from time import sleep
 
 
 def readValues(receiver,samp_rate):
-    print(samp_rate)
+   # print(samp_rate)
     data = receiver.read_samples(1024000)
     valueDBFS = 20*np.log10(abs(data)/32768)
     SigPower = 10*np.log10(10*((data.real**2)+(data.imag**2)))
@@ -25,12 +25,14 @@ def getSNR(power):
     no_outliers = power[not_outlier]
     Pmax = max(no_outliers)
     Pmin = min(no_outliers)
-    floor = -35.1205
-    print("Maximum SNR: ", Pmax)
-    print("Minimum SNR: ", Pmin)
+    floor = -36
+    #print("Maximum SNR: ", Pmax)
+   # print("Minimum SNR: ", Pmin)
     SNR = Pmax-floor
+    if(SNR < 1):
+        SNR = 0
     #snr_vals[i] = SNR
-    #print("The SNR is ", SNR)
+    print("The SNR is ", SNR,"\n")
 
    # snr_vals = np.append(snr_vals, SNR)
     return SNR
@@ -39,7 +41,7 @@ def getSNR(power):
 def getDist(SNR):
 
 
-    print(SNR)
+    #print(SNR)
     x = SNR 
     ColdDist = 0.1245*(x**2)-10.659*x+212.36
     WarmDist = -0.0857*(x**3)+6.2553*(x**2)-155.33*(x)+1342.8
@@ -47,17 +49,23 @@ def getDist(SNR):
     ian = .0195*(x**3)-1.0075*(x**2)+12.906*(x)+14.742
     will = (frank + ian)/2
     mike = .0174*(x**3)-.8964*(x**2)+10.857*(x)+29.338
+    radio = 0.0096*(x**3)-0.4104*(x**2)-1.6395*(x)+172.77
+    radio2 = -0.0502*(x**3)+4.1756*(x**2)-117.64*(x)+1140.9
+    #print("Radio 1 Distance: ", radio)
+    #print("Radio 2 Distance: ", radio2)
+    #print("\n")
+    #print("\n")
     #print("eq1", frank)
     #print("eq2", ian)
     #print("eq3 ", will)
     #print('mike', mike)
-    print("The distance is between", mike-2, "and", mike+2,"ft. away")
+    #print("The distance is between", radio-2, "and", radio+2,"ft. away")
     #print("Cold Distance: ", ColdDist)
     #print("Warm Distance: ", WarmDist)
     #print('\n')
     
 
-    return mike
+    return radio
 
 def dirFind(shortDist, longDist, ceiling):
     antDist = 1
@@ -106,7 +114,7 @@ def findCase(SNRmax, SNRsecond, snr1, snr2, snr3, snr4):
         casenum = 4
         ceiling = 180
 
-    elif(SNRmax == snr3 and SNRsecond == snr4):
+    elif(SNRmax == snr3 and SNRsecond == snr2):
         casenum = 5
         ceiling = 225
 
@@ -124,7 +132,8 @@ def findCase(SNRmax, SNRsecond, snr1, snr2, snr3, snr4):
     else:
         casenum = 0
         ceiling = 0
-  
+    print("Case Number: ", casenum,"\n")
+    print("Ceiling: ", ceiling,"\n")
 
     return casenum, ceiling
 
@@ -139,7 +148,7 @@ def main():
     print("Louisiana Tech University")
     print("This program is for technical demonstration only and is not for use\nin any commercial, industrial, or operational environments.\n")
 
-    print("Version Notes: Adds ability to coordinate direction with multiple antennas.\n")
+    #print("Version Notes: Adds ability to coordinate direction with multiple antennas.\n")
 
     sdrgain = 0
     bw = 32e3
@@ -150,22 +159,23 @@ def main():
     if len(sys.argv)==2:
         centerfreq = sys.argv[1]
     else:
-        centerfreq = 462662500 - (correction/2)
-
+        centerfreq = 462562500
+#	print(centerfreq)
     #print(len(sys.argv))
     #print(sys.argv[0])
 
-    sdr1gain = 25
-    sdr2gain = 25
-    sdr3gain = 25
-    sdr4gain = 25
+    sdr1gain = 5
+    sdr2gain = 5
+    sdr3gain = 5
+    sdr4gain = 5
 
     #Configures SDR1
     sdr1 = RtlSdr(serial_number='0000101')
     sdr1.sample_rate = sampRate
     sdr1.bandwidth = bw
     sdr1.center_freq = centerfreq
-    sdr1.gain=sdrgain
+    print(sdr1.center_freq)
+    sdr1.gain=sdr1gain
     sdr1.freq_correction = correction
 
     #Configures SDR2
@@ -173,7 +183,7 @@ def main():
     sdr2.sample_rate = sampRate
     sdr2.bandwidth = bw
     sdr2.center_freq = centerfreq
-    sdr2.gain=sdrgain
+    sdr2.gain=sdr2gain
     sdr2.freq_correction = correction
 
     #Configures SDR3
@@ -181,7 +191,7 @@ def main():
     sdr3.sample_rate = sampRate
     sdr3.bandwidth = bw
     sdr3.center_freq = centerfreq
-    sdr3.gain=sdrgain
+    sdr3.gain=sdr3gain
     sdr3.freq_correction = correction
 
     #Configures SDR4
@@ -189,10 +199,10 @@ def main():
     sdr4.sample_rate = sampRate
     sdr4.bandwidth = bw
     sdr4.center_freq = centerfreq
-    sdr4.gain=sdrgain
+    sdr4.gain=sdr4gain
     sdr4.freq_correction = correction
 
-    print("Center Frequency: ", centerfreq)
+    #print("Center Frequency: ", centerfreq)
     while(1):
         sdr1data = readValues(sdr1, sampRate) #Returns Power of SDR1
         sleep(0.1)
@@ -207,36 +217,36 @@ def main():
         snr3 = np.float32(getSNR(sdr3data)) #Returns SNR of SDR3
         snr4 = np.float32(getSNR(sdr4data)) #Returns SNR of SDR4
         all_snr = [snr1, snr2, snr3, snr4] #Puts all SDR Data in an array
-        print("All SNR: ")
-        print(all_snr)
+      #  print("All SNR: ")
+       # print(all_snr)
         all_snr.sort()
-        print("Sorted SNR: ")
+       # print("Sorted SNR: ")
         print(all_snr)
 	#reg_list = np.tolist(sorted_snr)
         highSNR = all_snr[-1] #Gets highest SNR
         secondSNR = all_snr[-2] #Gets second highest SNR
-        print("High SNR: ", highSNR,"\n")
-        print("Second SNR: ", secondSNR, "\n")
+       # print("High SNR: ", highSNR,"\n")
+       # print("Second SNR: ", secondSNR, "\n")
 
         if((highSNR or secondSNR) != 0 and (highSNR or secondSNR) > 2):
             shortDist = getDist(highSNR) #Uses highest SNR to find distance
             longDist = getDist(secondSNR) #Gets distance from second highest antenna SNR
-            print("Printing vals that go into findcase\n")
-            print(highSNR, secondSNR)
-            print(snr1, snr2, snr3, snr4)
+         #   print("Printing vals that go into findcase\n")
+         #   print(highSNR, secondSNR)
+         #   print(snr1, snr2, snr3, snr4)
             try:
                 case, ceiling = findCase(highSNR, secondSNR, snr1, snr2, snr3, snr4)
                 if(case==0):
                     raise TypeError
-                print("\n")
-                print("Case Number: ", case)
-                print("Ceiling: ", ceiling, " degrees")
+          #      print("\n")
+          #      print("Case Number: ", case)
+          #      print("Ceiling: ", ceiling, " degrees")
 
                 angle = dirFind(shortDist, longDist, ceiling)
 
                 print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
             except TypeError:
-                print("Casenum Error")
+            #    print("Casenum Error")
                 pass
 
 if(__name__ == "__main__"):
