@@ -38,7 +38,7 @@ def findZone(SNR):
 #print(sys.argv[0])
 
 #configuring the device
-sdr = RtlSdr(serial_number='0000101')
+sdr = RtlSdr(serial_number='0000103')
 sdr.sample_rate =1.024e6
 sdr.bandwidth = 512e3
 if len(sys.argv)==2:
@@ -47,7 +47,7 @@ else:
     sdr.center_freq = 462562500
 print("Current Frequency: ", sdr.center_freq)
 sdr.freq_correction=1
-sdr.gain=5
+sdr.gain=6
 #time = 21
 snr_vals = []
 

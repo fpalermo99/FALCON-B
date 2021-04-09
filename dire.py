@@ -2,17 +2,38 @@ import numpy as np
 from rtlsdr  import RtlSdr
 import os, sys
 from time import sleep
-#import matplotlib
-#import matplotlib.pyplot as plt
 #np.set_printoptions(threshold=sys.maxsize)
 
 
 def readValues(receiver,samp_rate):
-   # print(samp_rate)
     data = receiver.read_samples(1024000)
     valueDBFS = 20*np.log10(abs(data)/32768)
     SigPower = 10*np.log10(10*((data.real**2)+(data.imag**2)))
     return SigPower
+    
+
+def findZone(SNR):
+	if(SNR > 42.9):
+		distmin = 7
+		distmax = 15
+        	colorzone = 1
+	elif(SNR > 40.11 and SNR < 42.9):
+		distmin = 15
+		distmax = 25
+        	colorzone = 2
+	elif(SNR < 40.11 and SNR > 37.455):
+		distmin = 25
+		distmax = 35
+        	colorzone = 3
+	elif(SNR < 37.455 and SNR > 30.5):
+		distmin = 35
+		distmax = 45
+        	colorzone = 4
+	elif(SNR < 30.5 and SNR > 25):
+		distmin = 45
+		distmax = 100
+        	colorzone = 5
+	return distmin, distmax, colorzone
     
 
 
@@ -24,48 +45,22 @@ def getSNR(power):
     not_outlier = dist_mean < (max_dev * st_dev)
     no_outliers = power[not_outlier]
     Pmax = max(no_outliers)
-    Pmin = min(no_outliers)
+#    Pmax = max(power)
+#    Pmin = min(no_outliers)
     floor = -36
-    #print("Maximum SNR: ", Pmax)
-   # print("Minimum SNR: ", Pmin)
     SNR = Pmax-floor
     if(SNR < 1):
         SNR = 0
-    #snr_vals[i] = SNR
-    print("The SNR is ", SNR,"\n")
 
-   # snr_vals = np.append(snr_vals, SNR)
     return SNR
     
 
 def getDist(SNR):
-
-
-    #print(SNR)
+    print(SNR)
     x = SNR 
-    ColdDist = 0.1245*(x**2)-10.659*x+212.36
-    WarmDist = -0.0857*(x**3)+6.2553*(x**2)-155.33*(x)+1342.8
-    frank = .0177*(x**3)-.9015*(x**2)+10.86*(x)+27.934
-    ian = .0195*(x**3)-1.0075*(x**2)+12.906*(x)+14.742
-    will = (frank + ian)/2
-    mike = .0174*(x**3)-.8964*(x**2)+10.857*(x)+29.338
-    radio = 0.0096*(x**3)-0.4104*(x**2)-1.6395*(x)+172.77
-    radio2 = -0.0502*(x**3)+4.1756*(x**2)-117.64*(x)+1140.9
-    #print("Radio 1 Distance: ", radio)
-    #print("Radio 2 Distance: ", radio2)
-    #print("\n")
-    #print("\n")
-    #print("eq1", frank)
-    #print("eq2", ian)
-    #print("eq3 ", will)
-    #print('mike', mike)
-    #print("The distance is between", radio-2, "and", radio+2,"ft. away")
-    #print("Cold Distance: ", ColdDist)
-    #print("Warm Distance: ", WarmDist)
-    #print('\n')
-    
-
-    return radio
+    radiolog = -98.72*np.log(x)+387.86
+    #print("the incoming signal is ", radiolog, "ft away")
+    return radiolog
 
 def dirFind(shortDist, longDist, ceiling):
     antDist = 1
@@ -85,13 +80,7 @@ def dirFind(shortDist, longDist, ceiling):
     
     z=np.sqrt((boxLeg**2)+(b**2)-(2*boxLeg*b*np.cos(angle1)))
     mu = np.arcsin((np.sin(angle1)*b)/z)
-
-
-
-    direction =ceiling-mu
-
-
-    
+    direction =ceiling-mu   
 
     return direction
 
@@ -133,7 +122,7 @@ def findCase(SNRmax, SNRsecond, snr1, snr2, snr3, snr4):
         casenum = 0
         ceiling = 0
     print("Case Number: ", casenum,"\n")
-    print("Ceiling: ", ceiling,"\n")
+    #print("Ceiling: ", ceiling,"\n")
 
     return casenum, ceiling
 
@@ -148,26 +137,18 @@ def main():
     print("Louisiana Tech University")
     print("This program is for technical demonstration only and is not for use\nin any commercial, industrial, or operational environments.\n")
 
-    #print("Version Notes: Adds ability to coordinate direction with multiple antennas.\n")
-
-    sdrgain = 0
+    sdrgain = 5
     bw = 32e3
     sampRate = 1.024e6
     correction = 50
+
+
 
     #global snr1, snr2, snr3, snr4
     if len(sys.argv)==2:
         centerfreq = sys.argv[1]
     else:
         centerfreq = 462562500
-#	print(centerfreq)
-    #print(len(sys.argv))
-    #print(sys.argv[0])
-
-    sdr1gain = 5
-    sdr2gain = 5
-    sdr3gain = 5
-    sdr4gain = 5
 
     #Configures SDR1
     sdr1 = RtlSdr(serial_number='0000101')
@@ -175,7 +156,7 @@ def main():
     sdr1.bandwidth = bw
     sdr1.center_freq = centerfreq
     print(sdr1.center_freq)
-    sdr1.gain=sdr1gain
+    sdr1.gain=5
     sdr1.freq_correction = correction
 
     #Configures SDR2
@@ -183,7 +164,7 @@ def main():
     sdr2.sample_rate = sampRate
     sdr2.bandwidth = bw
     sdr2.center_freq = centerfreq
-    sdr2.gain=sdr2gain
+    sdr2.gain=5
     sdr2.freq_correction = correction
 
     #Configures SDR3
@@ -191,7 +172,7 @@ def main():
     sdr3.sample_rate = sampRate
     sdr3.bandwidth = bw
     sdr3.center_freq = centerfreq
-    sdr3.gain=sdr3gain
+    sdr3.gain=5
     sdr3.freq_correction = correction
 
     #Configures SDR4
@@ -199,10 +180,9 @@ def main():
     sdr4.sample_rate = sampRate
     sdr4.bandwidth = bw
     sdr4.center_freq = centerfreq
-    sdr4.gain=sdr4gain
+    sdr4.gain=4
     sdr4.freq_correction = correction
 
-    #print("Center Frequency: ", centerfreq)
     while(1):
         sdr1data = readValues(sdr1, sampRate) #Returns Power of SDR1
         sleep(0.1)
@@ -217,35 +197,53 @@ def main():
         snr3 = np.float32(getSNR(sdr3data)) #Returns SNR of SDR3
         snr4 = np.float32(getSNR(sdr4data)) #Returns SNR of SDR4
         all_snr = [snr1, snr2, snr3, snr4] #Puts all SDR Data in an array
-      #  print("All SNR: ")
+        #print("All SNR: ")
        # print(all_snr)
         all_snr.sort()
-       # print("Sorted SNR: ")
-        print(all_snr)
-	#reg_list = np.tolist(sorted_snr)
+        #print("Sorted SNR: ")
         highSNR = all_snr[-1] #Gets highest SNR
         secondSNR = all_snr[-2] #Gets second highest SNR
-       # print("High SNR: ", highSNR,"\n")
-       # print("Second SNR: ", secondSNR, "\n")
+	if(highSNR == snr1):
+		snr3 = 0
+	if(highSNR == snr2):
+		snr4 = 0
+	if(highSNR == snr3):
+		snr1 = 0
+	if(highSNR == snr4):
+		snr2 = 0
+	all_snr2 = [snr1, snr2, snr3, snr4]
+	print(all_snr2)
+	all_snr2.sort()
+	highSNR2 = all_snr2[-1]
+	secondSNR2 = all_snr2[-2]
+	print(all_snr2)
+        #print("High SNR: ", highSNR,"\n")
+        #print("Second SNR: ", secondSNR, "\n")
 
-        if((highSNR or secondSNR) != 0 and (highSNR or secondSNR) > 2):
-            shortDist = getDist(highSNR) #Uses highest SNR to find distance
-            longDist = getDist(secondSNR) #Gets distance from second highest antenna SNR
-         #   print("Printing vals that go into findcase\n")
+        if((highSNR2 or secondSNR2) != 0 and (highSNR2 or secondSNR2) > 2):
+            shortDist = getDist(highSNR2) #Uses highest SNR to find distance
+            #longDist = getDist(secondSNR2) #Gets distance from second highest antenna SNR
          #   print(highSNR, secondSNR)
          #   print(snr1, snr2, snr3, snr4)
             try:
-                case, ceiling = findCase(highSNR, secondSNR, snr1, snr2, snr3, snr4)
+                case, ceiling = findCase(highSNR2, secondSNR2, snr1, snr2, snr3, snr4)
+                minDist, maxDist, colorZone = findZone(highSNR)
+                locationMatrix = [case, colorZone]
+                #print("The signal is between ", minDist, " feet away and ", maxDist, " feet away.")
                 if(case==0):
                     raise TypeError
           #      print("\n")
           #      print("Case Number: ", case)
           #      print("Ceiling: ", ceiling, " degrees")
 
-                angle = dirFind(shortDist, longDist, ceiling)
+                #angle = dirFind(shortDist, longDist, ceiling)
+		print("Signal Detected!")
+		print("Distance: ", minDist, " to ", maxDist, " feet away.")
+		print("Distance Zone: ", colorZone)
+		print("Direction Zone: ", case)
 
-                print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
-            except TypeError:
+                #print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
+            except:
             #    print("Casenum Error")
                 pass
 
