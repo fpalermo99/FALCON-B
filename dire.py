@@ -56,7 +56,7 @@ def getSNR(power):
     
 
 def getDist(SNR):
-    print(SNR)
+    #print(SNR)
     x = SNR 
     radiolog = -98.72*np.log(x)+387.86
     #print("the incoming signal is ", radiolog, "ft away")
@@ -121,7 +121,7 @@ def findCase(SNRmax, SNRsecond, snr1, snr2, snr3, snr4):
     else:
         casenum = 0
         ceiling = 0
-    print("Case Number: ", casenum,"\n")
+    #print("Case Number: ", casenum,"\n")
     #print("Ceiling: ", ceiling,"\n")
 
     return casenum, ceiling
@@ -184,6 +184,8 @@ def main():
     sdr4.freq_correction = correction
 
     while(1):
+        print("Collecting data...")
+        
         sdr1data = readValues(sdr1, sampRate) #Returns Power of SDR1
         sleep(0.1)
         sdr2data = readValues(sdr2, sampRate) #Returns Power of SDR2
@@ -212,11 +214,11 @@ def main():
 	if(highSNR == snr4):
 		snr2 = 0
 	all_snr2 = [snr1, snr2, snr3, snr4]
-	print(all_snr2)
+	#print(all_snr2)
 	all_snr2.sort()
 	highSNR2 = all_snr2[-1]
 	secondSNR2 = all_snr2[-2]
-	print(all_snr2)
+	#print(all_snr2)
         #print("High SNR: ", highSNR,"\n")
         #print("Second SNR: ", secondSNR, "\n")
 
@@ -224,7 +226,7 @@ def main():
             shortDist = getDist(highSNR2) #Uses highest SNR to find distance
             #longDist = getDist(secondSNR2) #Gets distance from second highest antenna SNR
          #   print(highSNR, secondSNR)
-         #   print(snr1, snr2, snr3, snr4)
+            #print(snr1, snr2, snr3, snr4)
             try:
                 case, ceiling = findCase(highSNR2, secondSNR2, snr1, snr2, snr3, snr4)
                 minDist, maxDist, colorZone = findZone(highSNR)
@@ -237,15 +239,18 @@ def main():
           #      print("Ceiling: ", ceiling, " degrees")
 
                 #angle = dirFind(shortDist, longDist, ceiling)
-		print("Signal Detected!")
-		print("Distance: ", minDist, " to ", maxDist, " feet away.")
-		print("Distance Zone: ", colorZone)
-		print("Direction Zone: ", case)
-
+                print("Signal Detected!")
+                print "Distance: ", minDist, " to ", maxDist, " feet away."
+                #print "Distance Zone: ", colorZone
+                print "Direction Zone: ", case
+                print "Ceiling: ", ceiling, " degrees to ", ceiling-45, " degrees"
+                
                 #print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
+                for _ in range(2):
+                    print('\n')
             except:
             #    print("Casenum Error")
-                pass
+                print("Error")
 
 if(__name__ == "__main__"):
     main()
