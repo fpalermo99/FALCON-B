@@ -243,7 +243,7 @@ def main():
                 print "Distance: ", minDist, " to ", maxDist, " feet away."
                 #print "Distance Zone: ", colorZone
                 print "Direction Zone: ", case
-                print "Ceiling: ", ceiling, " degrees to ", ceiling-45, " degrees"
+                print "Ceiling: ", ceiling-45, " degrees to ", ceiling, " degrees"
                 
                 #print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
                 for _ in range(2):
