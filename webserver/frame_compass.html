@@ -1,0 +1,12 @@
+<html><head>
+  <div id="comp"></div>
+</head>
+</html>
+<script>
+  update_data = function () {
+      x = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Compass_Card_B%2BW.svg/1200px-Compass_Card_B%2BW.svg.png";
+      document.getElementById('comp').innerHTML = '<img src="' + x + '" alt="Compass" width="100%" height="100%"/>';
+;
+  };
+  window.onload = setInterval(update_data, 3000);
+</script>
