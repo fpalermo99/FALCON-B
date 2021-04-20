@@ -1,0 +1,15 @@
+<html><head>
+    <h1>Recent Data</h1>
+    <div id="dist"></div>
+    <div id="bear"></div>
+</head>
+</html>
+<script>
+    update_data = function () {
+        x = Math.floor((Math.random() * 10) + 1);
+        y = Math.floor((Math.random() * 10) + 1);
+        document.getElementById('dist').innerHTML = "<h2>Distance: " + x + "</h2>";
+        document.getElementById('bear').innerHTML = "<h2>Bearing: " + y + "</h2>";
+    };
+    window.onload = setInterval(update_data, 3000);
+</script>
