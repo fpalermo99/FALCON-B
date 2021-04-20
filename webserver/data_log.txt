@@ -1,0 +1,3 @@
+Dist: 10,Brng: 45,Zone: 1.1,
+Dist: 20,Brng: 90,Zone: 2.3,
+Dist: 30,Brng: 315,Zone: 4.2,

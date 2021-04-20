@@ -28,18 +28,14 @@ def data_get():
     # Get the last line from the file
     p = Popen(['tail','-1',f],shell=False, stderr=PIPE, stdout=PIPE)
     res,err = p.communicate()
-    if err:
-        print(err.decode())
-        return {"dist":0, "brng":0, "zone":1.1}
-    else:
-        # Use split to get the part of the line that you require
-        res = res.decode().split(',')
-        dst = res[0].split(' ')[1]
-        brng = res[1].split(' ')[1]
-        zone = res[2].split(' ')[1]
-        return {"dist":int(dst), "brng":int(brng), "zone":float(zone)}
+    # Use split to get the part of the line that you require
+    res = res.decode().split(',')
+    dst = res[0].split(' ')[1]
+    brng = res[1].split(' ')[1]
+    zone = res[2].split(' ')[1]
+    return {"dist":int(dst), "brng":int(brng), "zone":float(zone)}
 @app.route('/img/<path:path>', methods = ['GET'])
-def data_get(path):
+def img_get(path):
     if len(path) == 3:
         return send_file("../zonal/{}.png".format(path))
     return send_file("../zonal/1.1.png")
