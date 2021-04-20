@@ -245,7 +245,7 @@ def main():
                 print "Direction Zone: ", case
                 print "Ceiling: ", ceiling, " degrees to ", ceiling-45, " degrees"
                 data_log = open("./webserver/data_log.txt","a+",0)
-                data_log.write("Dist: {},Brng: {},Zone: {}-{},\n".format((minDist+maxDist)//2, ceiling, case, colorZone))
+                data_log.write("Dist: {},Brng: {},Zone: {}.{},\n".format((minDist+maxDist)//2, ceiling, case, colorZone))
                 data_log.close()
                 #print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
                 for _ in range(2):
