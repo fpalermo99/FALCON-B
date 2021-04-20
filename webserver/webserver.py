@@ -33,7 +33,7 @@ def data_get():
     dst = res[0].split(' ')[1]
     brng = res[1].split(' ')[1]
     zone = res[2].split(' ')[1]
-    return {"dist":int(dst), "brng":int(brng), "zone":float(zone)}
+    return str({"dist":int(dst), "brng":int(brng), "zone":float(zone)})
 @app.route('/img/<path:path>', methods = ['GET'])
 def img_get(path):
     if len(path) == 3:
