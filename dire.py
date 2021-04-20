@@ -10,7 +10,7 @@ def readValues(receiver,samp_rate):
     valueDBFS = 20*np.log10(abs(data)/32768)
     SigPower = 10*np.log10(10*((data.real**2)+(data.imag**2)))
     return SigPower
-    
+
 
 def findZone(SNR):
 	if(SNR > 42.9):
@@ -34,7 +34,7 @@ def findZone(SNR):
 		distmax = 100
         	colorzone = 5
 	return distmin, distmax, colorzone
-    
+
 
 
 def getSNR(power):
@@ -53,11 +53,11 @@ def getSNR(power):
         SNR = 0
 
     return SNR
-    
+
 
 def getDist(SNR):
     #print(SNR)
-    x = SNR 
+    x = SNR
     radiolog = -98.72*np.log(x)+387.86
     #print("the incoming signal is ", radiolog, "ft away")
     return radiolog
@@ -77,10 +77,10 @@ def dirFind(shortDist, longDist, ceiling):
     gammaDeg = np.rad2deg(gamma)
 
     angle1 = alphaDeg + 45
-    
+
     z=np.sqrt((boxLeg**2)+(b**2)-(2*boxLeg*b*np.cos(angle1)))
     mu = np.arcsin((np.sin(angle1)*b)/z)
-    direction =ceiling-mu   
+    direction =ceiling-mu
 
     return direction
 
@@ -128,10 +128,10 @@ def findCase(SNRmax, SNRsecond, snr1, snr2, snr3, snr4):
 
 
 
-    
+
 def main():
     clear = lambda: os.system('clear')
-    clear()    
+    clear()
     print("\nFALCON-B Tracking and Monitoring Software v0.0.2.")
     print("Created by Ian Carney, Michael Krzystowczyk, William Lee, and Frank Palermo.")
     print("Louisiana Tech University")
@@ -185,7 +185,7 @@ def main():
 
     while(1):
         print("Collecting data...")
-        
+
         sdr1data = readValues(sdr1, sampRate) #Returns Power of SDR1
         sleep(0.1)
         sdr2data = readValues(sdr2, sampRate) #Returns Power of SDR2
@@ -244,7 +244,9 @@ def main():
                 #print "Distance Zone: ", colorZone
                 print "Direction Zone: ", case
                 print "Ceiling: ", ceiling, " degrees to ", ceiling-45, " degrees"
-                
+                data_log = open("./webserver/data_log.txt","a+",0)
+                data_log.write("Dist: {},Brng: {},Zone: {}-{},\n".format((minDist+maxDist)//2, ceiling, case, colorZone))
+                data_log.close()
                 #print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
                 for _ in range(2):
                     print('\n')
@@ -254,5 +256,3 @@ def main():
 
 if(__name__ == "__main__"):
     main()
-   
-
