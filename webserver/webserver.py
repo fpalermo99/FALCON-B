@@ -38,6 +38,11 @@ def data_get():
         brng = res[1].split(' ')[1]
         zone = res[2].split(' ')[1]
         return {"dist":int(dst), "brng":int(brng), "zone":float(zone)}
+@app.route('/img/<path:path>', methods = ['GET'])
+def data_get(path):
+    if len(path) == 3:
+        return send_file("../zonal/{}.png".format(path))
+    return send_file("../zonal/1.1.png")
 # main
 if __name__ == "__main__":
     app.run(host= "0.0.0.0", port=8000, threaded=True)
