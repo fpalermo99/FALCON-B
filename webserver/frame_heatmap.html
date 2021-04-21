@@ -1,10 +1,10 @@
 <head>
 	<!-- Load plotly.js into the DOM -->
 	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
-    <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+    <div id='myDiv' width="95%" height="95%"><!-- Plotly chart will be drawn inside this DIV --></div>
 </head>
 <script>
-    window.onload = setInterval(update_data, 500);
+    window.onload = setInterval(update_data, 3000);
     xarr = ['0-45', '45-90', '90-135', '135-180', '180-225', '225-270', '270-315', '315-360']
     yarr = ['10ft', '20ft', '30ft', '40ft', '50ft']
     zarr = [
