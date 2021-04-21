@@ -1,15 +1,20 @@
 <html><head>
-    <h1>Recent Data</h1>
+    <h2>Recent Data</h2>
     <div id="dist"></div>
     <div id="bear"></div>
+    <div id="zone"></div>
 </head>
 </html>
 <script>
-    update_data = function () {
-        x = Math.floor((Math.random() * 10) + 1);
-        y = Math.floor((Math.random() * 10) + 1);
-        document.getElementById('dist').innerHTML = "<h2>Distance: " + x + "</h2>";
-        document.getElementById('bear').innerHTML = "<h2>Bearing: " + y + "</h2>";
+    function update_data() {
+        fetch('/datagetter')
+              .then(response => response.json())
+                  .then(data => update_doc(data))
+    }
+    update_doc = function (data) {
+        document.getElementById('dist').innerHTML = "<h3>Distance: " + data.dist + "</h3>";
+        document.getElementById('bear').innerHTML = "<h3>Bearing: " + data.brng + "</h3>";
+        document.getElementById('zone').innerHTML = "<h3>Zone: " + data.zone + "</h3>";
     };
     window.onload = setInterval(update_data, 3000);
 </script>
