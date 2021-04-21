@@ -14,6 +14,7 @@
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0]
     ]
+	idx = null;
     function update_data() {
         //given 1.3
         //1 is angle window, 3 is distance window
@@ -21,11 +22,14 @@
         //for us: 2nd dimension ==> angle/bearing
         // dst = Math.floor(Math.random() * (4 - 0 + 1) + 0)
         // brng = Math.floor(Math.random() * (7 - 0 + 1) + 0)
-        fetch('/datagetter')
+        fetch('/datagetter/'+idx)
               .then(response => response.json())
-                  .then(data => update_plot(data.zone.toString()))
+                  .then(data => update_plot(data))
     }
     function update_plot(zone) {
+		if (data.wait == 1) {return false}
+		idx = data.idx
+		zone = data.zone.toString()
         brng = Number(zone[0]) - 1
         dst = Number(zone[2]) - 1
         zarr[dst][brng] += 1

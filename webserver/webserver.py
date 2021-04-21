@@ -22,8 +22,8 @@ def map_get():
 @app.route('/frame_recent_data.html', methods = ['GET'])
 def recent_get():
     return send_file("./frame_recent_data.html")
-@app.route('/datagetter', methods = ['GET'])
-def data_get():
+@app.route('/datagetter/<path:path>', methods = ['GET'])
+def data_get(path):
     f = 'data_log.txt'
     # Get the last line from the file
     p = Popen(['tail','-1',f],shell=False, stderr=PIPE, stdout=PIPE)
@@ -33,7 +33,10 @@ def data_get():
     dst = res[0].split(' ')[1]
     brng = res[1].split(' ')[1]
     zone = res[2].split(' ')[1]
-    return jsonify({"dist":int(dst), "brng":int(brng), "zone":float(zone)})
+    idx = res[3].split(' ')[1]
+    if idx == path:
+        return jsonify({"wait":1})
+    return jsonify({"dist":int(dst), "brng":int(brng), "zone":float(zone), "idx":idx, "wait":0})
     # return jsonify({"dist":int(1), "brng":int(2), "zone":float(1.2)})
 @app.route('/img/<path:path>', methods = ['GET'])
 def img_get(path):

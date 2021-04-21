@@ -3,12 +3,15 @@
 </head>
 </html>
 <script>
+    idx = null;
   update_data = function () {
-      fetch('/datagetter')
+      fetch('/datagetter/'+idx)
             .then(response => response.json())
                 .then(data => update_doc(data))
   };
   update_doc = function (data) {
+      if (data.wait == 1) {return false}
+      idx = data.idx
       document.getElementById('comp').innerHTML = '<img src="' + '/img/' + data.zone + '" alt="Compass" width="100%" height="100%"/>';
   };
   window.onload = setInterval(update_data, 3000);
