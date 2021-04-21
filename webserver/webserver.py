@@ -1,5 +1,5 @@
 
-from flask import Flask, send_file
+from flask import Flask, send_file, jsonify
 from subprocess import Popen, PIPE
 
 # app
@@ -33,10 +33,11 @@ def data_get():
     dst = res[0].split(' ')[1]
     brng = res[1].split(' ')[1]
     zone = res[2].split(' ')[1]
-    return str({"dist":int(dst), "brng":int(brng), "zone":float(zone)})
+    return jsonify({"dist":int(dst), "brng":int(brng), "zone":float(zone)})
+    # return jsonify({"dist":int(1), "brng":int(2), "zone":float(1.2)})
 @app.route('/img/<path:path>', methods = ['GET'])
 def img_get(path):
-    if len(path) == 3:
+    if (len(path) >= 3):
         return send_file("../zonal/{}.png".format(path))
     return send_file("../zonal/1.1.png")
 # main
