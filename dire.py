@@ -182,7 +182,7 @@ def main():
     sdr4.center_freq = centerfreq
     sdr4.gain=4
     sdr4.freq_correction = correction
-
+    _idx = 0
     while(1):
         print("Collecting data...")
 
@@ -245,8 +245,9 @@ def main():
                 print "Direction Zone: ", case
                 print "Ceiling: ", ceiling, " degrees to ", ceiling-45, " degrees"
                 data_log = open("./webserver/data_log.txt","a+",0)
-                data_log.write("Dist: {},Brng: {},Zone: {}.{},\n".format((minDist+maxDist)//2, ceiling, case, colorZone))
+                data_log.write("Dist: {},Brng: {},Zone: {}.{},Idx: {},\n".format((minDist+maxDist)//2, ceiling, case, colorZone,_idx))
                 data_log.close()
+                _idx += 1
                 #print("Signal Detected! There is a signal that is ", shortDist, " away at an angle of ", angle, " degrees.")
                 for _ in range(2):
                     print('\n')

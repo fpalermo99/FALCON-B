@@ -8,12 +8,15 @@
 
     google.charts.load('current', {packages: ['corechart', 'bar']});
     data_arr = [["Callback", "Distance"]];
+    idx = null;
     function update_data() {
-        fetch('/datagetter')
+        fetch('/datagetter/' + idx)
               .then(response => response.json())
                   .then(data => update_graph(data))
     }
     function update_graph(data) {
+        if (data.wait == 1) {return false}
+        idx = data.idx
         data_arr.push([data_arr.length, data.dist])
         var data = google.visualization.arrayToDataTable(data_arr);
 

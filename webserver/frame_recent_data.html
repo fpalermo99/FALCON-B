@@ -6,12 +6,15 @@
 </head>
 </html>
 <script>
+    idx = null;
     function update_data() {
-        fetch('/datagetter')
+        fetch('/datagetter/'+idx)
               .then(response => response.json())
                   .then(data => update_doc(data))
     }
     update_doc = function (data) {
+        if (data.wait == 1) {return false}
+        idx = data.idx
         document.getElementById('dist').innerHTML = "<h3>Distance: " + data.dist + "</h3>";
         document.getElementById('bear').innerHTML = "<h3>Bearing: " + data.brng + "</h3>";
         document.getElementById('zone').innerHTML = "<h3>Zone: " + data.zone + "</h3>";

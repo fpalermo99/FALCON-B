@@ -87,11 +87,17 @@
     function deg2rad(deg) {return deg * Math.PI / 180};
     function rad2deg(rad) {return rad * 180 / Math.PI};
     function ft2km(ft) {return (ft/3.2808)/1000};
+	idx = null
 	function update_map() {
-        fetch('/datagetter')
+        fetch('/datagetter/'+idx)
               .then(response => response.json())
-                  .then(data => add_map_vector(data.dist, data.brng))
+                  .then(data => update_map_vector(data))
     }
+	function update_map_vector(data) {
+		if (data.wait == 1) {return false}
+		idx = data.idx
+		add_map_vector(data.dist, data.brng)
+	}
 
   </script>
 </head>
